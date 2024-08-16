@@ -1,7 +1,9 @@
 # Getting Started with Netflix GPT
-
-## Create React App
-## Configured tailwind CSS
+    - Create React App
+    - Configured tailwind CSS
+    - Header
+    - Login Form
+    - Sign up Form
 
 ## Features
     - Login/Sign Up
@@ -17,4 +19,3 @@
     - NetflixGPT
         - Search Bar
         - Movie Suggestions
-
