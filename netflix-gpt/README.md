@@ -13,6 +13,7 @@
     - Setup redux store with userSlice
     - Sign Out
     - Update Profile API
+    - Restrict routes for unauthenticated users
 
 ## Features
     - Login/Sign Up
