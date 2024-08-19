@@ -1,8 +1,24 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import Header from "./Header";
+import { validData } from "../utils/validate";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+import { auth } from "../utils/firebase";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addUser } from "../utils/userSlice";
 
 const Login = () => {
   const [isSignUp, setIsSignUp] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const email = useRef(null);
+  const password = useRef(null);
+  const fullName = useRef(null);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSignUp = () => {
     setIsSignUp(!isSignUp);
@@ -32,6 +48,66 @@ const Login = () => {
     </>
   );
 
+  const handleButtonClick = () => {
+    // Validate form data
+    const message = validData(email.current.value, password.current.value);
+    setErrorMessage(message);
+    if (message) return;
+
+    // Sign in / Sign up
+    if (isSignUp) {
+      createUserWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
+        .then((userCredential) => {
+          // Signed up
+          const user = userCredential.user;
+          updateProfile(user, {
+            displayName: fullName.current.value,
+            photoURL: "https://avatars.githubusercontent.com/u/78161633?v=4",
+          })
+            .then(() => {
+              const { uid, email, fullName, photoURL } = auth.currentUser;
+              dispatch(
+                addUser({
+                  uid: uid,
+                  email: email,
+                  fullName: fullName,
+                  photoURL: photoURL,
+                })
+              );
+              navigate("/browse");
+            })
+            .catch((error) => {
+              navigate("/error");
+            });
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setErrorMessage(errorCode + "-" + errorMessage);
+        });
+    } else {
+      signInWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
+        .then((userCredential) => {
+          // Signed in
+          const user = userCredential.user;
+          navigate("/browse");
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setErrorMessage(errorCode + "-" + errorMessage);
+        });
+    }
+  };
+
   return (
     <div>
       <Header />
@@ -43,28 +119,38 @@ const Login = () => {
       </div>
 
       {/* Login Form */}
-      <form className="absolute p-12 bg-black bg-opacity-85 w-1/4 my-36 mx-auto left-0 right-0 text-white rounded-lg">
+      <form
+        onSubmit={(e) => e.preventDefault()}
+        className="absolute p-12 bg-black bg-opacity-85 w-1/4 my-36 mx-auto left-0 right-0 text-white rounded-lg"
+      >
         <h1 className="font-bold text-3xl py-4">
           {isSignUp ? "Sign Up" : "Sign In"}
         </h1>
         {isSignUp && (
           <input
             type="text"
+            ref={fullName}
             placeholder="Full Name"
             className="p-4 my-3 w-full rounded-sm bg-slate-800 bg-opacity-50 border"
           />
         )}
         <input
           type="text"
+          ref={email}
           placeholder="Email or mobile number"
           className="p-4 my-3 w-full rounded-sm bg-slate-800 bg-opacity-50 border"
         />
         <input
           type="password"
+          ref={password}
           placeholder="Password"
           className="p-4 my-3 w-full rounded-sm bg-slate-800 bg-opacity-50 border"
         />
-        <button className="p-2 my-2 bg-red-700 font-bold rounded-md w-full">
+        <p className="text-lg text-red-600 font-bold my-2">{errorMessage}</p>
+        <button
+          className="p-2 my-2 bg-red-700 font-bold rounded-md w-full"
+          onClick={handleButtonClick}
+        >
           {isSignUp ? "Sign Up" : "Sign In"}
         </button>
         <div className="flex w-full justify-center my-2">OR</div>
