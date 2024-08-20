@@ -14,6 +14,7 @@
     - Sign Out
     - Update Profile API
     - Restrict routes for unauthenticated users
+    - Unsubscribed to the onAuthStateChange callback
 
 ## Features
     - Login/Sign Up
