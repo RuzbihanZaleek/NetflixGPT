@@ -15,6 +15,7 @@
     - Update Profile API
     - Restrict routes for unauthenticated users
     - Unsubscribed to the onAuthStateChange callback
+    - Add hard coded values to the constant files
 
 ## Features
     - Login/Sign Up
